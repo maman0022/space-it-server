@@ -66,10 +66,16 @@ languageRouter
 languageRouter
   .get('/head', async (req, res, next) => {
     try {
-      const headWord = await LanguageService.getWord(
-        req.app.get('db'),
-        req.language.head,
-      )
+      let headWord
+      if (wordsList) {
+        headWord = wordsList.head.value
+      }
+      else {
+        headWord = await LanguageService.getWord(
+          req.app.get('db'),
+          req.language.head,
+        )
+      }
 
       res.json({
         nextWord: headWord.original,
