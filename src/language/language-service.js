@@ -29,7 +29,7 @@ const LanguageService = {
       .where({ language_id })
   },
 
-  getHeadWord(db, id) {
+  getWord(db, id) {
     return db
       .from('word')
       .select(
@@ -44,6 +44,24 @@ const LanguageService = {
       )
       .where({ id })
       .first()
+  },
+
+  async incrementTotalScore(db, user_id) {
+    const language = await LanguageService.getUsersLanguage(db, user_id)
+    const total_score = ++language.total_score
+    db.from('language').where('id', language.id).update({ total_score })
+  },
+
+  async incrementWordScore(db, word_id) {
+    const word = await LanguageService.getWord(db, word_id)
+    const correct_count = ++word.correct_count
+    db.from('word').where('id', word_id).update({ correct_count })
+  },
+
+  async decrementWordScore(db, word_id) {
+    const word = await LanguageService.getWord(db, word_id)
+    const incorrect_count = ++word.incorrect_count
+    db.from('word').where('id', word_id).update({ incorrect_count })
   }
 }
 

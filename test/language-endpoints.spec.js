@@ -155,7 +155,7 @@ describe.only('Language Endpoints', function () {
       )
     })
 
-    it.skip(`responds with 400 required error when 'guess' is missing`, () => {
+    it(`responds with 400 required error when 'guess' is missing`, () => {
       const postBody = {
         randomField: 'test random field',
       }
@@ -169,54 +169,12 @@ describe.only('Language Endpoints', function () {
         })
     })
 
-    context(`Given incorrect guess`, () => {
-      const incorrectPostBody = {
-        guess: 'incorrect',
-      }
-
-      it.skip(`responds with incorrect and moves head`, () => {
-        return supertest(app)
-          .post(`/api/language/guess`)
-          .set('Authorization', helpers.makeAuthHeader(testUser))
-          .send(incorrectPostBody)
-          .expect(200)
-          .expect({
-            nextWord: testLanguagesWords[1].original,
-            totalScore: 0,
-            wordCorrectCount: 0,
-            wordIncorrectCount: 0,
-            answer: testLanguagesWords[0].translation,
-            isCorrect: false
-          })
-      })
-
-      it.skip(`moves the word 1 space and updates incorrect count`, async () => {
-        await supertest(app)
-          .post(`/api/language/guess`)
-          .set('Authorization', helpers.makeAuthHeader(testUser))
-          .send(incorrectPostBody)
-
-        await supertest(app)
-          .post(`/api/language/guess`)
-          .set('Authorization', helpers.makeAuthHeader(testUser))
-          .send(incorrectPostBody)
-          .expect({
-            nextWord: testLanguagesWords[0].original,
-            totalScore: 0,
-            wordCorrectCount: 0,
-            wordIncorrectCount: 1,
-            answer: testLanguagesWords[1].translation,
-            isCorrect: false
-          })
-      })
-    })
-
     context(`Given correct guess`, () => {
       const testLanguagesWords = testWords.filter(
         word => word.language_id === testLanguage.id
       )
 
-      it.skip(`responds with correct and moves head`, () => {
+      it(`responds with correct and moves head`, () => {
         const correctPostBody = {
           guess: testLanguagesWords[0].translation,
         }
@@ -235,30 +193,14 @@ describe.only('Language Endpoints', function () {
           })
       })
 
-      it.skip(`moves the word 2 spaces, increases score and correct count`, async () => {
+      it(`moves the word 2 spaces, increases score and correct count`, async () => {
         let correctPostBody = {
-          guess: testLanguagesWords[0].translation,
-        }
-        await supertest(app)
-          .post(`/api/language/guess`)
-          .set('Authorization', helpers.makeAuthHeader(testUser))
-          .send(correctPostBody)
-
-        correctPostBody = {
           guess: testLanguagesWords[1].translation,
         }
         await supertest(app)
           .post(`/api/language/guess`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(correctPostBody)
-          .expect({
-            nextWord: testLanguagesWords[2].original,
-            totalScore: 2,
-            wordCorrectCount: 0,
-            wordIncorrectCount: 0,
-            answer: testLanguagesWords[1].translation,
-            isCorrect: true
-          })
 
         correctPostBody = {
           guess: testLanguagesWords[2].translation,
@@ -274,6 +216,64 @@ describe.only('Language Endpoints', function () {
             wordIncorrectCount: 0,
             answer: testLanguagesWords[2].translation,
             isCorrect: true
+          })
+
+        correctPostBody = {
+          guess: testLanguagesWords[0].translation,
+        }
+        await supertest(app)
+          .post(`/api/language/guess`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
+          .send(correctPostBody)
+          .expect({
+            nextWord: testLanguagesWords[1].original,
+            totalScore: 4,
+            wordCorrectCount: 1,
+            wordIncorrectCount: 0,
+            answer: testLanguagesWords[0].translation,
+            isCorrect: true
+          })
+      })
+    })
+
+    context(`Given incorrect guess`, () => {
+      const incorrectPostBody = {
+        guess: 'incorrect',
+      }
+
+      it(`responds with incorrect and moves head`, () => {
+        return supertest(app)
+          .post(`/api/language/guess`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
+          .send(incorrectPostBody)
+          .expect(200)
+          .expect({
+            nextWord: testLanguagesWords[2].original,
+            totalScore: 4,
+            wordCorrectCount: 1,
+            wordIncorrectCount: 0,
+            answer: testLanguagesWords[1].translation,
+            isCorrect: false
+          })
+      })
+
+      it(`moves the word 1 space and updates incorrect count`, async () => {
+        await supertest(app)
+          .post(`/api/language/guess`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
+          .send(incorrectPostBody)
+
+        await supertest(app)
+          .post(`/api/language/guess`)
+          .set('Authorization', helpers.makeAuthHeader(testUser))
+          .send(incorrectPostBody)
+          .expect({
+            nextWord: testLanguagesWords[2].original,
+            totalScore: 4,
+            wordCorrectCount: 1,
+            wordIncorrectCount: 1,
+            answer: testLanguagesWords[1].translation,
+            isCorrect: false
           })
       })
     })
