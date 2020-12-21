@@ -102,7 +102,7 @@ languageRouter
       const word = wordsList.head.value
 
       if (guess === word.translation) {
-        LanguageService.incrementTotalScore(req.app.get('db'), req.user.id)
+        LanguageService.incrementTotalScore(req.app.get('db'), req.language)
         LanguageService.incrementWordScore(req.app.get('db'), word.id)
         ++totalScore
         ++word.correct_count

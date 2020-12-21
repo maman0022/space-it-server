@@ -46,22 +46,17 @@ const LanguageService = {
       .first()
   },
 
-  async incrementTotalScore(db, user_id) {
-    const language = await LanguageService.getUsersLanguage(db, user_id)
-    const total_score = ++language.total_score
-    db.from('language').where('id', language.id).update({ total_score })
+  incrementTotalScore(db, language) {
+    //had to include then because of a bug in knex, which doesn't update if then not included
+    db.from('language').where('id', language.id).increment('total_score', 1).then()
   },
 
-  async incrementWordScore(db, word_id) {
-    const word = await LanguageService.getWord(db, word_id)
-    const correct_count = ++word.correct_count
-    db.from('word').where('id', word_id).update({ correct_count })
+  incrementWordScore(db, word_id) {
+    db.from('word').where('id', word_id).increment('correct_count', 1).then()
   },
 
-  async decrementWordScore(db, word_id) {
-    const word = await LanguageService.getWord(db, word_id)
-    const incorrect_count = ++word.incorrect_count
-    db.from('word').where('id', word_id).update({ incorrect_count })
+  decrementWordScore(db, word_id) {
+    db.from('word').where('id', word_id).increment('incorrect_count', 1).then()
   }
 }
 

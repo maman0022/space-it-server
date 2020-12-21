@@ -24,7 +24,7 @@ class LinkedList {
     headWord.next = null
     let currentNode = this.head
     for (let i = 1; i < places; i++) {
-      if(!currentNode.next){
+      if (!currentNode.next) {
         break
       }
       currentNode = currentNode.next
