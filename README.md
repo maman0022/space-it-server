@@ -9,100 +9,55 @@ More information about this app and how it works can be found here - https://git
 This is a Node.js back-end using the express.js server framework. Knex is used to interact with the database and postgrator is used for migrations. Helmet is used to provide header security and user passwords are hashed using bcrypt. The JSONWebToken library is used to generate the authentication tokens. Testing is done with mocha, chai, and supertest for the endpoints.
 
 ## API Documentation  
-BASE URL: https://warm-eyrie-01628.herokuapp.com
-All of the endpoints except login and register require an authorization header with bearer type and token provided on login.  
+BASE URL: https://warm-eyrie-01628.herokuapp.com 
 ### Endpoints  
 
-`POST /api/login`  
+`POST /api/auth`  
 Authenticates user. *Requires a request body*  
 Key|Value
 ---|---
-email|string, required
+username|string, required
 password|string, required  
   
 Returns a JSON Web Token.
   
 ---  
+
+`PUT /api/auth`  
+Refreshes expired authentication token. *Requires a authorization header with bearer token*  
   
-`POST /api/register`  
+Returns a JSON Web Token.
+  
+---  
+  
+`POST /api/user`  
 Create a new user. *Requires a request body*  
 Key|Value
 ---|---
-fname|string, required
-lname|string, required
-email|string, required
+name|string, required
+username|string, required
 password|string, required  
   
 ---  
   
-`GET /api/courses`  
-Gets all courses for a user.  
-Returns an array of course objects which contain an id, title, date created, display color, and user id.  
+`GET /api/language`  
+Gets the language and asscociated words for a user. *Requires a authorization header with bearer token*  
+
+Returns an object containing "words" and "language" properties. 
 
 ---  
   
-`POST /api/courses`  
-Create a new course and add it to user's profile. *Requires a request body*  
-Key|Value
----|---
-title|string, required  
-  
-Returns a course object which contains an id, title, date created, display color, and user id.
+`GET /api/language/head`  
+Gets the first word and score for a user. *Requires a authorization header with bearer token*  
+
+Returns an object containing "nextWord", "totalScore", "wordCorrectCount", and "wordIncorrectCount" properties. 
 
 ---  
   
-`GET /api/courses/[id]`  
-Gets a course for a user with associated notes and essays.  
-Returns an object containing course, notes, and essays properties.  
-Course is same as described above, notes and essays is an array of objects containing id, title, date created, user id, course id, and content.
-  
----  
-  
-`DELETE /api/courses/[id]`  
-Deletes a course.  
-Returns a 204 if succesful.
-  
----  
-  
-`PATCH /api/courses/[id]`  
-Updates the color associated with that course. *Requires a request body*  
+`POST /api/language/guess`  
+Accepts a users translation for a word and returns whether it is correct and the next word. *Requires a request body & authorization header with bearer token*  
 Key|Value
 ---|---
-color|string, required  
+guess|string, required  
   
-Returns a 204 if succesful.
-  
----  
-  
-`POST /api/(notes | essays)`  
-Create a new note or essay depending on which endpoint is used and adds it to user's course. *Requires a request body*  
-Key|Value
----|---
-title|string, required  
-content|string, required  
-courseId|integer, required
-  
-Returns an object containing an id, title, date created, user id, course id, and content.
-
----  
-  
-`GET /api/(notes | essays)/[id]`  
-Gets a specific note or essay based on id    
-Returns an object containing an id, title, date created, user id, course id, and content.
-
----  
-  
-`DELETE /api/(notes | essays)/[id]`  
-Deletes a note or essay.  
-Returns a 204 if succesful.
-  
----  
-  
-`PATCH /api/(notes | essays)/[id]`  
-Updates the title and/or content associated with that note or essay. *Requires a request body*  
-Key|Value
----|---
-title|string, required  
-content|string, required  
-  
-Returns an object containing the updated properties.  
+Returns an object containing "nextWord", "totalScore", "wordCorrectCount", "wordIncorrectCount", "answer", and "isCorrect" properties. 
