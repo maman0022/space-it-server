@@ -1,5 +1,5 @@
-# Spaced repetition API!
-Live Link: https://spaced-repetition.maman0022.vercel.app  
+# SpACE IT!
+Live Link: https://space-it.maman0022.vercel.app 
   
 ## Summary  
 This is the server side of my full-stack spaced repetition language learning app. The main purpose of this back-end is to register and authenticate users. As well as, to retrieve user content which is hosted in a PostGreSQL database from the same host (Heroku).   
