@@ -1,20 +1,8 @@
 const express = require('express')
 const LanguageService = require('./language-service')
 const { requireAuth } = require('../middleware/jwt-auth')
-const { Node, LinkedList } = require('./list-service')
+const { createWordsList } = require('./list-service')
 
-let wordsList
-
-async function generateWordsList(db, languageId) {
-  if (!!wordsList) {
-    return
-  }
-  const words = await LanguageService.getLanguageWords(db, languageId)
-  wordsList = new LinkedList()
-  words.forEach(word => {
-    wordsList.add(new Node(word))
-  })
-}
 
 const languageRouter = express.Router()
 const jsonBodyParser = express.json()
@@ -33,7 +21,7 @@ languageRouter
           error: `You don't have any languages`,
         })
 
-      generateWordsList(req.app.get('db'), language.id)
+      req.wordsList = await createWordsList(req.user.id, req.app.get('db'), language.id)
 
       req.language = language
       next()
@@ -64,8 +52,8 @@ languageRouter
   .get('/head', async (req, res, next) => {
     try {
       let headWord
-      if (wordsList) {
-        headWord = wordsList.head.value
+      if (req.wordsList) {
+        headWord = req.wordsList.head.value
       }
       else {
         headWord = await LanguageService.getWord(
@@ -96,16 +84,15 @@ languageRouter
       }
 
       const { guess } = req.body
-      await generateWordsList(req.app.get('db'), req.language.id)
-      const word = wordsList.head.value
+      const word = req.wordsList.head.value
 
       if (guess === word.translation) {
         const totalScore = await LanguageService.incrementTotalScore(req.app.get('db'), req.language)
         LanguageService.incrementWordScore(req.app.get('db'), word.id)
         ++word.correct_count
         word.memory_value *= 2
-        wordsList.moveHeadBack(word.memory_value)
-        const nextWord = wordsList.head.value
+        req.wordsList.moveHeadBack(word.memory_value)
+        const nextWord = req.wordsList.head.value
         return res.status(200).json({
           nextWord: nextWord.original,
           totalScore,
@@ -121,8 +108,8 @@ languageRouter
         const totalScore = await LanguageService.getTotalScore(req.app.get('db'), req.language.id)
         ++word.incorrect_count
         word.memory_value = 1
-        wordsList.moveHeadBack(word.memory_value)
-        const nextWord = wordsList.head.value
+        req.wordsList.moveHeadBack(word.memory_value)
+        const nextWord = req.wordsList.head.value
         return res.status(200).json({
           nextWord: nextWord.original,
           totalScore,

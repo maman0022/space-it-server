@@ -1,3 +1,5 @@
+const LanguageService = require('./language-service')
+
 class LinkedList {
   constructor() {
     this.head = null
@@ -41,7 +43,21 @@ class Node {
   }
 }
 
+const Lists = {}
+
+async function createWordsList(userId, db, languageId) {
+  if (Lists[userId]) {
+    return Lists[userId]
+  }
+  const words = await LanguageService.getLanguageWords(db, languageId)
+  const newList = new LinkedList()
+  words.forEach(word => {
+    newList.add(new Node(word))
+  })
+  Lists[userId] = newList
+  return Lists[userId]
+}
+
 module.exports = {
-  LinkedList,
-  Node
+  createWordsList
 }
