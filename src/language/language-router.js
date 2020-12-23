@@ -4,7 +4,6 @@ const { requireAuth } = require('../middleware/jwt-auth')
 const { Node, LinkedList } = require('./list-service')
 
 let wordsList
-let totalScore
 
 async function generateWordsList(db, languageId) {
   if (!!wordsList) {
@@ -33,8 +32,6 @@ languageRouter
         return res.status(404).json({
           error: `You don't have any languages`,
         })
-
-      !totalScore ? totalScore = language.total_score : void 0
 
       generateWordsList(req.app.get('db'), language.id)
 
@@ -92,19 +89,19 @@ languageRouter
 languageRouter
   .post('/guess', jsonBodyParser, async (req, res, next) => {
     try {
-      if (!req.body.guess)
+      if (!req.body.guess) {
         return res.status(400).json({
           error: `Missing 'guess' in request body`,
         })
+      }
 
       const { guess } = req.body
       await generateWordsList(req.app.get('db'), req.language.id)
       const word = wordsList.head.value
 
       if (guess === word.translation) {
-        LanguageService.incrementTotalScore(req.app.get('db'), req.language)
+        const totalScore = await LanguageService.incrementTotalScore(req.app.get('db'), req.language)
         LanguageService.incrementWordScore(req.app.get('db'), word.id)
-        ++totalScore
         ++word.correct_count
         word.memory_value *= 2
         wordsList.moveHeadBack(word.memory_value)
@@ -121,6 +118,7 @@ languageRouter
 
       if (guess !== word.translation) {
         LanguageService.decrementWordScore(req.app.get('db'), word.id)
+        const totalScore = await LanguageService.getTotalScore(req.app.get('db'), req.language.id)
         ++word.incorrect_count
         word.memory_value = 1
         wordsList.moveHeadBack(word.memory_value)
