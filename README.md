@@ -1,4 +1,4 @@
-# SpACE IT!
+# spACE IT!
 Live Link: https://space-it.maman0022.vercel.app 
   
 ## Summary  
